@@ -1,0 +1,39 @@
+{
+  "name": "kryptstorm-api",
+  "version": "1.0.0",
+  "description": "Kryptstorm Microservices System",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kryptstorm/kryptstorm-api"
+  },
+  "author": {
+    "name": "Tuan Nguyen",
+    "email": "tuan.nguyen070893@gmail.com",
+    "url": "https://github.com/kryptstorm"
+  },
+  "scripts": {
+    "exec-file": "./node_modules/.bin/babel-node",
+    "exec-file-dev": "NODE_ENV=development npm run exec-file",
+    "exec-test": "NODE_ENV=development ./node_modules/.bin/mocha --compilers js:babel-core/register",
+    "test": "find ./src -name '*test.js' | xargs npm run --silent exec-test",
+    "start-dev": "NODE_ENV=development nodemon src/bin/http.js --exec babel-node"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "babel-register": "^6.24.1",
+    "chai": "^4.1.0",
+    "faker": "^4.1.0",
+    "mocha": "^3.5.0",
+    "nodemon": "^1.11.0",
+    "prettier": "^1.5.2"
+  },
+  "dependencies": {
+    "axios": "^0.16.2",
+    "bluebird": "^3.5.0",
+    "lodash": "^4.17.4",
+    "seneca": "^3.4.1"
+  }
+}

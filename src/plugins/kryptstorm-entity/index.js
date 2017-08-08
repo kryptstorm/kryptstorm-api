@@ -28,7 +28,7 @@ export default function XEntity(options) {
 	 * enity.fields$ is a FUNCTION return what should be saved to entity
 	 * 
 	 * @param {object} opts 
-	 * - opts.fields$ <Array> what fields should be return
+	 * - opts.fields$ <Array> how many fields should be return
 	 * @param {bool} returnEntity Return enitty instance instead of entity object
 	 */
   Entity.asyncSave$ = function asyncSave$(opts = {}, returnEntity = false) {
@@ -55,7 +55,7 @@ export default function XEntity(options) {
 	 * Load one entity
 	 * 
 	 * @param {object} query 
-	 * - query.fields$ <Array> what fields should be return
+	 * - query.fields$ <Array> how many fields should be return
 	 * - query.native$ <Array|Object> (array -  use first element as query, second element as meta settings, object - use object as query, no meta settings)
 	 * @param {bool} returnEntity Return enitty instance instead of entity object
 	 */
@@ -82,7 +82,7 @@ export default function XEntity(options) {
 	 * Load list entity
 	 * 
 	 * @param {object} query 
-	 * - query.fields$ <Array> what fields should be return
+	 * - query.fields$ <Array> how many fields should be return
 	 * - query.limit$ number of entities should be return
 	 * - query.skip$ number of entities should be skip
 	 * - query.sort$ {field_1: -1, field_2: 1}
@@ -112,6 +112,15 @@ export default function XEntity(options) {
     });
   };
 
+	/**
+	 * Remove entities
+	 * 
+	 * @param {object} query 
+	 * - query.fields$ <Array> how many fields should be return
+	 * - query.all$ (default is false) Delete all entities match condition
+	 * - query.load$ (default is true) Return data after deleted an entity
+	 * - query.native$ <Array|Object> (array -  use first element as query, second element as meta settings, object - use object as query, no meta settings)
+	 */
   Entity.asyncRemove$ = function asyncRemove$(query = {}) {
     // Resolve query
     if (!_.isBoolean(query.all$) || !query.all$) {

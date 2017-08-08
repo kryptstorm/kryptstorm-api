@@ -18,7 +18,7 @@ const App = fn =>
   }).test(fn);
 
 // Defined basic test
-describe("XService - Basic", function() {
+describe("XService - External API is not belong to Kryptstorm", function() {
   // Init test app
   const app = App();
 
@@ -49,11 +49,14 @@ describe("XService - Basic", function() {
       .act("faker:name, properties:firstName")
       .then(({ errorCode$ = "ERROR_NONE", data$ }) => {
         // If errorCode$ is not equal to ERROR_NONE, that mean we an error :) easy
-        expect(errorCode$).to.be.equal("ERROR_NONE");
+				expect(errorCode$).to.be.equal("ERROR_NONE");
+				
         // If action has been successful, data$ must be an object
-        expect(data$).to.be.an("object");
+				expect(data$).to.be.an("object");
+				
         // And our data must be exist
-        expect(data$.firstName).to.be.exist;
+				expect(data$.firstName).to.be.exist;
+				
         // Test is successful
         done();
       })

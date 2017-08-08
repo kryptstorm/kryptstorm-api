@@ -101,10 +101,43 @@ describe("XEntity - Basic", function() {
       .catch(done);
   });
 
+  it("Update", function(done) {
+    let dog = app.make$("dogs"),
+      newName = "Gau";
+    dog
+      .asyncLoad$({ id, fields$: returnFields }, true) // The second params will make asyncLoad$ return entity instead of object
+      .then(loadedDog => {
+        // By default, result of asyncLoad$ will be convert to object
+        expect(loadedDog).to.be.an("object");
+
+        // All properties has been loaded
+        expect(loadedDog.name).to.be.exist;
+        expect(loadedDog.createdAt).to.be.exist;
+        expect(loadedDog.status).to.be.exist;
+
+        loadedDog.name = newName;
+        return loadedDog.asyncSave$({ fields$: returnFields });
+      })
+      .then(savedDog => {
+        // By default, result of asyncSave$ will be convert to object
+        expect(savedDog).to.be.an("object");
+
+        // All properties has been saved
+        expect(savedDog.name).to.be.equal(newName);
+
+        // Id must be keep
+        expect(savedDog.id).to.be.equal(id);
+
+        // Test is successful
+        done();
+      })
+      .catch(done);
+  });
+
   it("Delete", function(done) {
     let dog = app.make$("dogs");
     dog
-      .asyncRemove$({ id, fields$: returnFields }) // The second params will make asyncLoad$ return entity instead of object
+      .asyncRemove$({ id, fields$: returnFields })
       .then(removedDog => {
         // By default, result of asyncRemove$ will be convert to object
         expect(removedDog).to.be.an("object");

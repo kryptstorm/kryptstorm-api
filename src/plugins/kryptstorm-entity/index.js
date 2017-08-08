@@ -28,7 +28,7 @@ export default function XEntity(options) {
 	 * enity.fields$ is a FUNCTION return what should be saved to entity
 	 * 
 	 * @param {object} opts 
-	 * - opts.fields$ <Array> what fields should be return after saved
+	 * - opts.fields$ <Array> what fields should be return
 	 * @param {bool} returnEntity Return enitty instance instead of entity object
 	 */
   Entity.asyncSave$ = function asyncSave$(opts = {}, returnEntity = false) {
@@ -51,6 +51,14 @@ export default function XEntity(options) {
     );
   };
 
+  /**
+	 * Load one entity
+	 * 
+	 * @param {object} query 
+	 * - query.fields$ <Array> what fields should be return
+	 * - query.native$ <Array|Object> (array -  use first element as query, second element as meta settings, object - use object as query, no meta settings)
+	 * @param {bool} returnEntity Return enitty instance instead of entity object
+	 */
   Entity.asyncLoad$ = function asyncLoad$(query = {}, returnEntity = false) {
     // Resolve query
     if (!_.isObject(query)) query = {};
@@ -68,6 +76,40 @@ export default function XEntity(options) {
 
     // Return entity object
     return _asyncLoad$(query).then(ent => Bluebird.resolve(_formatEntity(ent)));
+  };
+
+  /**
+	 * Load list entity
+	 * 
+	 * @param {object} query 
+	 * - query.fields$ <Array> what fields should be return
+	 * - query.limit$ number of entities should be return
+	 * - query.skip$ number of entities should be skip
+	 * - query.sort$ {field_1: -1, field_2: 1}
+	 * - query.native$ <Array|Object> (array -  use first element as query, second element as meta settings, object - use object as query, no meta settings)
+	 * @param {bool} returnEntity Return enitty instance instead of entity object
+	 */
+  Entity.asyncList$ = function asyncList$(query = {}, returnEntity = false) {
+    // Resolve query
+    if (!_.isObject(query)) query = {};
+    if (!_.isArray(query.fields$) || _.isEmpty(query.fields$)) {
+      query.fields$ = _fields;
+    }
+
+    // Create async method for seneca.entity.load$
+    const _asyncList$ = Bluebird.promisify(Entity.list$, {
+      context: this
+		});
+
+    // Return entity instance instead of entity object
+    if (returnEntity) return _asyncList$(query);
+
+    // Return array of entity object
+    return _asyncList$(query).then(ents => {
+			let result = [];
+      _.each(ents, ent => result.push(_formatEntity(ent)));
+      return Bluebird.resolve(result);
+    });
   };
 
   this.add("init:XEntity", function initXEntity(args, done) {

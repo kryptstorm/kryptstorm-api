@@ -84,7 +84,7 @@ describe("XEntity - Basic", function() {
   it("Read many row", function(done) {
     let dog = app.make$("dogs");
     dog
-      .asyncList$({ id })
+      .asyncList$({ fields$: returnFields })
       .then(loadedDogs => {
         // By default, result of asyncList$ will be convert to array of object
         expect(loadedDogs).to.be.an("array");
@@ -104,10 +104,15 @@ describe("XEntity - Basic", function() {
   it("Delete", function(done) {
     let dog = app.make$("dogs");
     dog
-      .asyncRemove$({ id }) // The second params will make asyncLoad$ return entity instead of object
+      .asyncRemove$({ id, fields$: returnFields }) // The second params will make asyncLoad$ return entity instead of object
       .then(removedDog => {
         // By default, result of asyncRemove$ will be convert to object
         expect(removedDog).to.be.an("object");
+
+        // All properties has been return after delete
+        expect(removedDog.name).to.be.exist;
+        expect(removedDog.createdAt).to.be.exist;
+        expect(removedDog.status).to.be.exist;
 
         // Delete the right entity
         expect(removedDog.id).to.be.equal(id);

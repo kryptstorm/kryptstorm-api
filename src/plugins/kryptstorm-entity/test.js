@@ -15,7 +15,8 @@ const App = fn =>
 
 // Defined basic test
 describe("XEntity - Basic", function() {
-  let id;
+  let id,
+    returnFields = ["name", "createdAt", "status"];
   // Init test app
   const app = App();
   // Use memory store
@@ -38,7 +39,7 @@ describe("XEntity - Basic", function() {
     dog.createdAt = new Date();
     dog.status = 1; // LIVE
     dog
-      .asyncSave$({ fields$: ["name", "createdAt", "status"] })
+      .asyncSave$({ fields$: returnFields })
       .then(savedDog => {
         // By default, result of asyncSave$ will be convert to object
         expect(savedDog).to.be.an("object");
@@ -64,15 +65,15 @@ describe("XEntity - Basic", function() {
   it("Read one row", function(done) {
     let dog = app.make$("dogs");
     dog
-      .asyncLoad$({ id })
+      .asyncLoad$({ id, fields$: returnFields })
       .then(loadedDog => {
         // By default, result of asyncLoad$ will be convert to object
         expect(loadedDog).to.be.an("object");
 
         // All properties has been loaded
-        expect(savedDog.name).to.be.exist;
-        expect(savedDog.createdAt).to.be.exist;
-        expect(savedDog.status).to.be.exist;
+        expect(loadedDog.name).to.be.exist;
+        expect(loadedDog.createdAt).to.be.exist;
+        expect(loadedDog.status).to.be.exist;
 
         // Test is successful
         done();

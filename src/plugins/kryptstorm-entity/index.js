@@ -32,6 +32,7 @@ export default function XEntity(options) {
 	 * @param {bool} returnEntity Return enitty instance instead of entity object
 	 */
   Entity.asyncSave$ = function asyncSave$(opts = {}, returnEntity = false) {
+    // Resolve options
     if (!_.isArray(opts.fields$) || _.isEmpty(opts.fields$)) opts.fields$ = [];
 
     // Create async method for seneca.entity.save$
@@ -46,8 +47,27 @@ export default function XEntity(options) {
 
     // Save and return entity object
     return _asyncSave$().then(ent =>
-      Bluebird.resolve(_formatENtity(ent, [..._fields, ...opts.fields$]))
+      Bluebird.resolve(_formatEntity(ent, [..._fields, ...opts.fields$]))
     );
+  };
+
+  Entity.asyncLoad$ = function asyncLoad$(query = {}, returnEntity = false) {
+    // Resolve query
+    if (!_.isObject(query)) query = {};
+    if (!_.isArray(query.fields$) || _.isEmpty(query.fields$)) {
+      query.fields$ = _fields;
+    }
+
+    // Create async method for seneca.entity.load$
+    const _asyncLoad$ = Bluebird.promisify(Entity.load$, {
+      context: this
+    });
+
+    // Return entity instance instead of entity object
+    if (returnEntity) return _asyncLoad$(query);
+
+    // Return entity object
+    return _asyncLoad$(query).then(ent => Bluebird.resolve(_formatEntity(ent)));
   };
 
   this.add("init:XEntity", function initXEntity(args, done) {
@@ -57,7 +77,7 @@ export default function XEntity(options) {
   return { name: "XEntity" };
 }
 
-const _formatENtity = (ent, fields$) => {
+const _formatEntity = (ent, fields$) => {
   let result = {},
     attributes;
 

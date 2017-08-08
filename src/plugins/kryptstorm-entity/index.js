@@ -99,16 +99,49 @@ export default function XEntity(options) {
     // Create async method for seneca.entity.load$
     const _asyncList$ = Bluebird.promisify(Entity.list$, {
       context: this
-		});
+    });
 
     // Return entity instance instead of entity object
     if (returnEntity) return _asyncList$(query);
 
     // Return array of entity object
     return _asyncList$(query).then(ents => {
-			let result = [];
+      let result = [];
       _.each(ents, ent => result.push(_formatEntity(ent)));
       return Bluebird.resolve(result);
+    });
+  };
+
+  Entity.asyncRemove$ = function asyncRemove$(query = {}) {
+    // Resolve query
+    if (!_.isBoolean(query.all$) || !query.all$) {
+      query.all$ = false;
+    }
+    if (!_.isBoolean(query.load$) || !query.load$) {
+      query.load$ = true;
+    }
+    if (!_.isArray(query.fields$) || _.isEmpty(query.fields$)) {
+      query.fields$ = [];
+    }
+
+    const _asyncRemove$ = Bluebird.promisify(Entity.remove$, {
+      context: this
+    });
+
+    return _asyncRemove$(query).then(attributes => {
+      // Delete many fields, we cannot return deleted data because seneca return empty data,
+      // just return empty array
+      if (query.all$) return Bluebird.resolve([]);
+
+      // Delete 1 row and load data after deleted
+      if (query.load$) {
+        return Bluebird.resolve(
+          _formatEntity(attributes, [..._fields, ...query.fields$])
+        );
+      }
+
+      // Delete 1 row and keep slient
+      return Bluebird.resolve({});
     });
   };
 

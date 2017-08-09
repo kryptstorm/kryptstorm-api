@@ -117,5 +117,18 @@ describe("XService - Hooks", function() {
     });
   });
 
-  describe("Pattern hooks", function() {});
+  describe("Pattern hooks", function() {
+    // Init test app
+    const app = App();
+
+    // Register XService
+    app.use(XService, {
+      beforeHooks: {
+        global: ["x_service:hook, before:global"]
+      },
+      afterHooks: {
+        global: ["x_service:hook, after:global"]
+      }
+    });
+  });
 });

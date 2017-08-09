@@ -124,11 +124,47 @@ describe("XService - Hooks", function() {
     // Register XService
     app.use(XService, {
       beforeHooks: {
-        global: ["x_service:hook, before:global"]
+        "x_service:test": ["x_service:hook, before:global"]
       },
       afterHooks: {
-        global: ["x_service:hook, after:global"]
+        "x_service:test": ["x_service:hook, after:global"]
       }
+    });
+
+    // Before hook for test, all thing you need will be prepare at there
+    before(done => {
+      app.add("x_service:hook, before:global", function(args, done) {
+        return done(null, { data$: { before: "hook" } });
+      });
+      app.add("x_service:test", function(args, done) {
+        return done(null, { data$: { main: "handler" } });
+      });
+      app.add("x_service:hook, after:global", function(args, done) {
+        return done(null, { data$: { after: "hook" } });
+      });
+      // App is ready to test
+      app.ready(() => done());
+    });
+
+    it("Pattern", function(done) {
+      app.XService$
+        .act("x_service:test")
+        .then(({ errorCode$ = "ERROR_NONE", data$ }) => {
+          // If errorCode$ is not equal to ERROR_NONE, that mean we an error :) easy
+          expect(errorCode$).to.be.equal("ERROR_NONE");
+
+          // If action has been successful, data$ must be an object
+          expect(data$).to.be.an("object");
+
+          // And our data must be exist
+          expect(data$.before).to.be.equal("hook");
+          expect(data$.main).to.be.equal("handler");
+          expect(data$.after).to.be.equal("hook");
+
+          // Test is successful
+          done();
+        })
+        .catch(done);
     });
   });
 });

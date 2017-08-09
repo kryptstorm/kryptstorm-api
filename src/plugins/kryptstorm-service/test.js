@@ -66,7 +66,7 @@ describe("XService - Call external API - what is not belong to Kryptstorm", func
 });
 
 describe("XService - Hooks", function() {
-  describe("XService - Global hooks", function() {
+  describe("Global hooks", function() {
     // Init test app
     const app = App();
 
@@ -116,4 +116,6 @@ describe("XService - Hooks", function() {
         .catch(done);
     });
   });
+
+  describe("Pattern hooks", function() {});
 });

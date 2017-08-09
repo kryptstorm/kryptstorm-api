@@ -6,66 +6,128 @@ import Axios from "axios";
 // Default options of this plugin
 const defaultOptions = {
   maps: {},
+  beforeHooks: {},
+  afterHooks: {},
   allowMethods: ["POST", "GET", "PUT", "DELETE"] // CRUD - POST, GET, PUT, DELETE
 };
 
 // Seneca plugin
 export default function XService(options) {
-  // Merge the options of user with plugin options
-  // User's options have more important than plugin options
-  // We don't want modify "defaultOptions",
-  // so write  _.assign({}, defaultOptions.maps, options.maps) instead of  _.assign(defaultOptions.maps, options.maps)
-  const _maps = _.isObject(options.maps)
-    ? _.assign({}, defaultOptions.maps, options.maps)
-    : {};
-  const _allowMethods = _.isArray(options.allowMethods)
-    ? _.uniq([...defaultOptions.allowMethods, ...options.allowMethods])
-    : defaultOptions.allowMethods;
+  // Extend user options with default options
+  options = _.merge(defaultOptions, options);
 
-  // Make seneca.act return a promise
-  const act = Bluebird.promisify(this.act, { context: this });
+  //
+  // Proccess external services
+  //
+  // Default mapper
+  const _mapper = data => data;
+  // Check a pattern is external (does npt register on this instance)
+  const _isExternalPattern = pattern =>
+    _.isString(pattern) &&
+    (_.isObject(options.maps[pattern]) || _.isString(options.maps[pattern]));
+  // Register act, this function will help user run external services
+  const _act = (pattern, patternParams) => {
+    // Make seneca.act return a promise
+    const act = Bluebird.promisify(this.act, { context: this });
+
+    // Because the map only receive a string as a key
+    // So, if the pattern is not a string, it is original seneca pattern (use object)
+    // Just return the original action, simple!!! :)
+    if (!_isExternalPattern(pattern)) {
+      return act(pattern, patternParams);
+    }
+
+    // We need to call an external service
+    const _externalPattern = options.maps[pattern];
+    const {
+      method = "GET",
+      url,
+      mapper,
+      query,
+      params,
+      body
+    } = _externalPattern;
+    // Only handle allow method
+    if (!_.includes(options.allowMethods, method)) {
+      return Bluebird.reject(
+        new Error(
+          `The method ${method} is not allow. Only accept: ` +
+            options.allowMethods.join(",")
+        )
+      );
+    }
+
+    // Tranform response to our format
+    let transformResponse = [_mapper];
+    if (_.isFunction(mapper)) {
+      transformResponse.push(mapper);
+    }
+
+    if (method === "GET") {
+      return Axios.get(url, { transformResponse }).then(({ data }) => {
+        return Bluebird.resolve(data);
+      });
+    }
+  };
+
+  //
+  // Process hooks
+  //
+  // If you defined hooks, please make sure all pattern of hook is exist
+  // If service cannot find one of pattern you provide,
+  // hook will return an exception an don't execute anything
+
+  // Register global hook
+  let _beforeHooks = _resolvePattern(options.beforeHooks.global),
+    _afterHooks = _resolvePattern(options.afterHooks.global);
+
+  // Check all pattern has been exist
+  const _verifyPatterns = patterns => {
+    let errors;
+    _.each(patterns, pattern => {
+      if (!this.has(pattern) && !_isExternalPattern(pattern))
+        errors = Bluebird.reject(
+          new Error(`Pattern ${pattern} has not been registered.`)
+        );
+    });
+    // An error has been exist, return it
+    if (errors) return errors;
+    return Bluebird.resolve(patterns);
+  };
 
   // XService method
   const XService$ = {
     act: (pattern, patternParams) => {
-      const _externalPattern = _maps[pattern];
-      // Because the map only receive a string as a key
-      // So, if the pattern is not a string, it is original seneca pattern (use object)
-      // Just return the original action, simple!!! :)
-      if (!_.isString(pattern) || !_externalPattern) {
-        return act(pattern, patternParams);
-      }
+      return _verifyPatterns([
+        ..._beforeHooks,
+        ..._resolvePattern(options.beforeHooks[pattern]),
+        pattern,
+        ..._resolvePattern(options.afterHooks[pattern]),
+        ..._afterHooks
+      ]).then(patterns =>
+        _.reduce(
+          patterns,
+          (instance, pattern) =>
+            instance.then(result => {
+              const {
+                errorCode$ = "ERROR_NONE",
+                message$ = "",
+                data$ = {}
+              } = result;
 
-      // We need to call an external service
-      const {
-        method = "GET",
-        url,
-        mapper,
-        query,
-        params,
-        data
-      } = _externalPattern;
-      // Only handle allow method
-      if (!_.includes(_allowMethods, method)) {
-        return Bluebird.reject(
-          new Error(
-            `The method ${method} is not allow. Only accept: ` +
-              _allowMethods.join(",")
-          )
-        );
-      }
+              // If errorCode$ is not equal to ERROR_NONE, response error code and error message
+              if (errorCode$ !== "ERROR_NONE") {
+                return Bluebird.reject(new Error(message$));
+              }
 
-      // Tranform response to our format
-      let transformResponse = [];
-      if (_.isFunction(mapper)) {
-        transformResponse.push(mapper);
-      }
-
-      if (method === "GET") {
-        return Axios.get(url, { transformResponse }).then(({ data }) =>
-          Bluebird.resolve(data)
-        );
-      }
+              // Handle this pattern and merge previous result to params
+              return _act(pattern, patternParams).then(_result =>
+                Bluebird.resolve(_.merge({}, result, _result))
+              );
+            }),
+          Bluebird.resolve({})
+        )
+      );
     }
   };
 
@@ -80,3 +142,9 @@ export default function XService(options) {
   // You must return service name, it must is the name you registered on init function
   return { name: "XService" };
 }
+
+const _resolvePattern = pattern => {
+  if (_.isString(pattern)) return [pattern];
+  if (_.isArray(pattern)) return pattern;
+  return [];
+};

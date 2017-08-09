@@ -13,12 +13,13 @@ import XService from ".";
 // Defined function - what will return test app instance
 const App = fn =>
   Seneca({
+    timeout: 10000,
     log: "test",
     debug: { undead: true }
   }).test(fn);
 
 // Defined basic test
-describe("XService - External API is not belong to Kryptstorm", function() {
+describe("XService - Call external API - what is not belong to Kryptstorm", function() {
   // Init test app
   const app = App();
 
@@ -33,7 +34,7 @@ describe("XService - External API is not belong to Kryptstorm", function() {
         // Optional fields
         query: Querystring.stringify({ property: "name.firstName" }), // the sevice query
         params: {}, // The service method parameters
-        data: {} // The request data (for create, update and patch)
+        body: {} // The request body (for create, update and patch)
       }
     }
   });
@@ -44,22 +45,75 @@ describe("XService - External API is not belong to Kryptstorm", function() {
     app.ready(() => done());
   });
 
-  it("Faker - Get firstName", function(done) {
+  it("faker.hook.io - Get firstName", function(done) {
     app.XService$
       .act("faker:name, properties:firstName")
       .then(({ errorCode$ = "ERROR_NONE", data$ }) => {
         // If errorCode$ is not equal to ERROR_NONE, that mean we an error :) easy
-				expect(errorCode$).to.be.equal("ERROR_NONE");
-				
+        expect(errorCode$).to.be.equal("ERROR_NONE");
+
         // If action has been successful, data$ must be an object
-				expect(data$).to.be.an("object");
-				
+        expect(data$).to.be.an("object");
+
         // And our data must be exist
-				expect(data$.firstName).to.be.exist;
-				
+        expect(data$.firstName).to.be.exist;
+
         // Test is successful
         done();
       })
       .catch(done);
+  });
+});
+
+describe("XService - Hooks", function() {
+  describe("XService - Global hooks", function() {
+    // Init test app
+    const app = App();
+
+    // Register XService
+    app.use(XService, {
+      beforeHooks: {
+        global: ["x_service:hook, before:global"]
+      },
+      afterHooks: {
+        global: ["x_service:hook, after:global"]
+      }
+    });
+
+    // Before hook for test, all thing you need will be prepare at there
+    before(done => {
+      app.add("x_service:hook, before:global", function(args, done) {
+        return done(null, { data$: { before: "hook" } });
+      });
+      app.add("x_service:test", function(args, done) {
+        return done(null, { data$: { main: "handler" } });
+      });
+      app.add("x_service:hook, after:global", function(args, done) {
+        return done(null, { data$: { after: "hook" } });
+      });
+      // App is ready to test
+      app.ready(() => done());
+    });
+
+    it("Global", function(done) {
+      app.XService$
+        .act("x_service:test")
+        .then(({ errorCode$ = "ERROR_NONE", data$ }) => {
+          // If errorCode$ is not equal to ERROR_NONE, that mean we an error :) easy
+          expect(errorCode$).to.be.equal("ERROR_NONE");
+
+          // If action has been successful, data$ must be an object
+          expect(data$).to.be.an("object");
+
+          // And our data must be exist
+          expect(data$.before).to.be.equal("hook");
+          expect(data$.main).to.be.equal("handler");
+          expect(data$.after).to.be.equal("hook");
+
+          // Test is successful
+          done();
+        })
+        .catch(done);
+    });
   });
 });

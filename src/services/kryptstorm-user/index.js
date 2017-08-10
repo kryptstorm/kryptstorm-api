@@ -20,13 +20,14 @@ export default function XUser(options) {
     return done();
   });
 
+  // Create new user
   this.add("x_user:create", function(args, done) {
     const { body } = args;
     const entity = this.make$.apply(null, options.entity);
 
     // Add creattion datetime
-		body.createdAt = new Date();
-		
+    body.createdAt = new Date();
+
     // Validation has been failed
     if (!Validator.validate("XUser.OnCreate", body)) {
       return done(null, {
@@ -42,6 +43,8 @@ export default function XUser(options) {
     // Format some fields
     entity.username = _.toLower(entity.username);
     entity.email = _.toLower(entity.email);
+    entity.firstName = _.upperFirst(_.toLower(entity.firstName));
+    entity.lastName = _.upperFirst(_.toLower(entity.lastName));
 
     // Hash password
     Bcrypt.hash(entity.password, 9)
@@ -51,6 +54,25 @@ export default function XUser(options) {
         // Save attributes
         return entity.asyncSave$({ fields$: PUBLIC_FIELDS });
       })
+      .then(attributes => done(null, { data$: attributes }))
+      .catch(done);
+  });
+
+  // Find a user by id
+  this.add("x_user:find_by_id", function(args, done) {
+    const { params } = args;
+    const entity = this.make$.apply(null, options.entity);
+
+    // Validation has been failed
+    if (!Validator.validate("XUser.OnFindById", params)) {
+      return done(null, {
+        errorCode$: "VALIDATION_FAILED",
+        errors$: Validator.errors
+      });
+    }
+
+    entity
+      .asyncLoad$(_.assign({}, params, { fields$: PUBLIC_FIELDS }))
       .then(attributes => done(null, { data$: attributes }))
       .catch(done);
   });

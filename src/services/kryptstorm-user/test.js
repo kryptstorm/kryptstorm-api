@@ -22,7 +22,7 @@ const App = fn =>
 
 // Defined basic test
 describe("XUser - Basic", function() {
-  let userId;
+  let attributes;
   // Init test app
   const app = App();
 
@@ -76,10 +76,48 @@ describe("XUser - Basic", function() {
         // And our data must be exist
         expect(data$.username).to.be.equal(_.toLower(body.username));
         expect(data$.email).to.be.equal(_.toLower(body.email));
-        expect(data$.firstName).to.be.equal(body.firstName);
-        expect(data$.lastName).to.be.equal(body.lastName);
+        expect(data$.firstName).to.be.equal(
+          _.upperFirst(_.toLower(data$.firstName))
+        );
+        expect(data$.lastName).to.be.equal(
+          _.upperFirst(_.toLower(body.lastName))
+        );
         expect(data$.status).to.be.equal(body.status);
         expect(data$.createdAt).to.be.exist;
+        expect(data$.id).to.be.exist;
+
+        // Password must not return
+        expect(data$.password).to.be.not.exist;
+
+        // Store user attributes
+        attributes = _.assign({}, data$);
+
+        // Test is successful
+        done();
+      })
+      .catch(done);
+  });
+
+  it("Read one record", function(done) {
+    const params = {
+      id: attributes.id
+		};
+    app.XService$
+      .act("x_user:find_by_id", { params })
+      .then(({ errorCode$ = "ERROR_NONE", data$, errors$ }) => {
+        // If errorCode$ is not equal to ERROR_NONE, that mean we an error :) easy
+        expect(errorCode$).to.be.equal("ERROR_NONE");
+
+        // If action has been successful, data$ must be an object
+        expect(data$).to.be.an("object");
+
+        // And our data must be exist
+        expect(data$.username).to.be.equal(attributes.username);
+        expect(data$.email).to.be.equal(attributes.email);
+        expect(data$.firstName).to.be.equal(attributes.firstName);
+        expect(data$.lastName).to.be.equal(attributes.lastName);
+        expect(data$.status).to.be.equal(attributes.status);
+        expect(data$.id).to.be.equal(attributes.id);
 
         // Password must not return
         expect(data$.password).to.be.not.exist;

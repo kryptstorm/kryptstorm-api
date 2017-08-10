@@ -33,12 +33,21 @@ const onCreate = {
   }
 };
 
+// Schema on find user by id
+const onFindById = {
+  $id: "XUser.OnFindById",
+  required: ["id"],
+  properties: {
+    id: { type: "string", pattern: "^[a-fA-F0-9]{24}$" }
+  }
+};
+
 // Schema on update user
 const onUpdate = {
   $id: "XUser.OnUpdate",
   required: ["id"],
   properties: {
-    id: { type: "string", pattern: "/^[a-fA-F0-9]{24}$/i" },
+    id: { type: "string", pattern: "^[a-fA-F0-9]{24}$" },
     password: { type: "string", minLength: 3, maxLength: 255 },
     status: {
       type: "number",
@@ -54,12 +63,12 @@ const onDetele = {
   $id: "XUser.OnDelete",
   required: ["id"],
   properties: {
-    id: { type: "string", pattern: "/^[a-fA-F0-9]{24}$/i" }
+    id: { type: "string", pattern: "^[a-fA-F0-9]{24}$" }
   }
 };
 
 // Export validator
 export default new Ajv({
   removeAdditional: "all",
-  schemas: [onCreate, onUpdate, onDetele]
+  schemas: [onCreate, onFindById, onUpdate, onDetele]
 });

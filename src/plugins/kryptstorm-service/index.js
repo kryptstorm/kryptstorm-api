@@ -135,7 +135,7 @@ export default function XService(options) {
   this.decorate("XService$", XService$);
 
   // Init function
-  this.add("init:XService", function initServices(args, done) {
+  this.add("init:XService", function initXService(args, done) {
     return done();
   });
 

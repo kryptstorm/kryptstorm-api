@@ -31,10 +31,13 @@
     "prettier": "^1.5.2"
   },
   "dependencies": {
+    "ajv": "^5.2.2",
     "axios": "^0.16.2",
+    "bcrypt": "^1.0.2",
     "bluebird": "^3.5.0",
     "lodash": "^4.17.4",
     "seneca": "^3.4.1",
-    "seneca-entity": "^2.0.2"
+    "seneca-entity": "^2.0.2",
+    "seneca-mongo-store": "^1.1.0"
   }
 }

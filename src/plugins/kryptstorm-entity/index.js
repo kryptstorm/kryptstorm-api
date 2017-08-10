@@ -112,7 +112,7 @@ export default function XEntity(options) {
     });
   };
 
-	/**
+  /**
 	 * Remove entities
 	 * 
 	 * @param {object} query 
@@ -154,6 +154,11 @@ export default function XEntity(options) {
     });
   };
 
+  // Register our method
+  const XEntity$ = {};
+  // Inject our method to seneca
+  this.decorate("XEntity$", XEntity$);
+
   this.add("init:XEntity", function initXEntity(args, done) {
     return done();
   });
@@ -168,8 +173,8 @@ const _formatEntity = (ent, fields$) => {
   // Invalid entity
   if (!_.isObject(ent) || _.isEmpty(ent)) return result;
 
-  // ent is seneca entity
-  if (typeof ent.data$ === "function") {
+  // ent is seneca entity - ent.data$ is a function
+  if (_.isFunction(ent.data$)) {
     attributes = ent.data$();
   } else {
     // Result of remove function is a mongo object, convert it to entity-like

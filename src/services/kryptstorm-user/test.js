@@ -8,7 +8,7 @@ import Faker from "faker";
 
 // Internal modules
 import XUser from ".";
-import { STATUS_ACTIVE } from "./schema";
+import { STATUS_ACTIVE, STATUS_LOCKED } from "./schema";
 import XService from "../../plugins/kryptstorm-service";
 import XEntity from "../../plugins/kryptstorm-entity";
 
@@ -77,7 +77,7 @@ describe("XUser - Basic", function() {
         expect(data$.username).to.be.equal(_.toLower(body.username));
         expect(data$.email).to.be.equal(_.toLower(body.email));
         expect(data$.firstName).to.be.equal(
-          _.upperFirst(_.toLower(data$.firstName))
+          _.upperFirst(_.toLower(body.firstName))
         );
         expect(data$.lastName).to.be.equal(
           _.upperFirst(_.toLower(body.lastName))
@@ -98,7 +98,7 @@ describe("XUser - Basic", function() {
       .catch(done);
   });
 
-  it("Read one record", function(done) {
+  it("Read one record by id", function(done) {
     const params = {
       id: attributes.id
     };
@@ -136,7 +136,7 @@ describe("XUser - Basic", function() {
         expect(errorCode$).to.be.equal("ERROR_NONE");
 
         // If action has been successful, data$ must be an object
-				expect(data$).to.be.an("array");
+        expect(data$).to.be.an("array");
 
         // And our data must be exist
         expect(data$[0].username).to.be.exist;
@@ -148,6 +148,48 @@ describe("XUser - Basic", function() {
 
         // Password must not return
         expect(data$[0].password).to.be.not.exist;
+
+        // Test is successful
+        done();
+      })
+      .catch(done);
+  });
+
+  it("Update one record by id", function(done) {
+    const params = {
+      id: attributes.id
+    };
+    const body = {
+      firstName: Faker.name.firstName(),
+      lastName: Faker.name.lastName(),
+      status: STATUS_LOCKED
+    };
+
+    app.XService$
+      .act("x_user:update_by_id", { params, body })
+      .then(({ errorCode$ = "ERROR_NONE", data$ }) => {
+        // If errorCode$ is not equal to ERROR_NONE, that mean we an error :) easy
+        expect(errorCode$).to.be.equal("ERROR_NONE");
+
+        // If action has been successful, data$ must be an object
+        expect(data$).to.be.an("object");
+
+        // And our data must be exist
+        expect(data$.username).to.be.exist;
+        expect(data$.email).to.be.exist;
+        expect(data$.firstName).to.be.equal(
+          _.upperFirst(_.toLower(body.firstName))
+        );
+        expect(data$.lastName).to.be.equal(
+          _.upperFirst(_.toLower(body.lastName))
+        );
+        expect(data$.status).to.be.equal(body.status);
+        expect(data$.createdAt).to.be.exist;
+        expect(data$.updatedAt).to.be.exist;
+        expect(data$.id).to.be.exist;
+
+        // Password must not return
+        expect(data$.password).to.be.not.exist;
 
         // Test is successful
         done();

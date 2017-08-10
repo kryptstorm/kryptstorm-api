@@ -80,9 +80,57 @@ export default function XUser(options) {
   this.add("x_user:find_all", function(args, done) {
     const { query } = args;
     const entity = this.make$.apply(null, options.entity);
+
+    // Validation has been failed
+    if (!Validator.validate("XUser.OnFindAll", query)) {
+      return done(null, {
+        errorCode$: "VALIDATION_FAILED",
+        errors$: Validator.errors
+      });
+    }
+
     entity
       .asyncList$(_.assign({}, query, { fields$: PUBLIC_FIELDS }))
       .then(entities => done(null, { data$: entities }))
+      .catch(done);
+  });
+
+  this.add("x_user:update_by_id", function(args, done) {
+    const { params, body } = args;
+    const entity = this.make$.apply(null, options.entity);
+
+    // Add creattion datetime
+    body.updatedAt = new Date();
+
+    // Validation has been failed
+    if (!Validator.validate("XUser.OnFindById", params)) {
+      return done(null, {
+        errorCode$: "VALIDATION_FAILED",
+        errors$: Validator.errors
+      });
+    }
+    if (!Validator.validate("XUser.OnUpdate", body)) {
+      return done(null, {
+        errorCode$: "VALIDATION_FAILED",
+        errors$: Validator.errors
+      });
+    }
+
+    entity
+      .asyncLoad$(_.assign({}, params, { fields$: PUBLIC_FIELDS }), true)
+      .then(entity => {
+        // Set attributes
+        // After validation, body is clean because of options "removeAdditional"
+        _.assign(entity, body);
+
+        // Format some fields
+        entity.firstName = _.upperFirst(_.toLower(entity.firstName));
+        entity.lastName = _.upperFirst(_.toLower(entity.lastName));
+
+        // Save attributes
+        return entity.asyncSave$({ fields$: PUBLIC_FIELDS });
+      })
+      .then(attributes => done(null, { data$: attributes }))
       .catch(done);
   });
 

@@ -12,7 +12,8 @@ export const PUBLIC_FIELDS = [
   "status",
   "firstName",
   "lastName",
-  "createdAt"
+  "createdAt",
+  "updatedAt"
 ];
 
 // Schema on create user
@@ -48,30 +49,26 @@ const onFindAll = {
     id: { type: "string", pattern: "^[a-fA-F0-9]{24}$" },
     username: { type: "string", minLength: 3, maxLength: 255 },
     email: { format: "email" },
-    password: { type: "string", minLength: 3, maxLength: 255 },
     status: {
       type: "number",
       enum: [STATUS_NEW, STATUS_ACTIVE]
     },
     firstName: { type: "string", maxLength: 255 },
-    lastName: { type: "string", maxLength: 255 },
-    createdAt: { format: "date-time" }
+    lastName: { type: "string", maxLength: 255 }
   }
 };
 
 // Schema on update user
 const onUpdate = {
   $id: "XUser.OnUpdate",
-  required: ["id"],
   properties: {
-    id: { type: "string", pattern: "^[a-fA-F0-9]{24}$" },
-    password: { type: "string", minLength: 3, maxLength: 255 },
     status: {
       type: "number",
       enum: [STATUS_NEW, STATUS_ACTIVE, STATUS_LOCKED]
     },
     firstName: { type: "string", maxLength: 255 },
-    lastName: { type: "string", maxLength: 255 }
+    lastName: { type: "string", maxLength: 255 },
+    updatedAt: { format: "date-time" }
   }
 };
 

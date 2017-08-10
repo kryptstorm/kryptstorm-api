@@ -101,7 +101,7 @@ describe("XUser - Basic", function() {
   it("Read one record", function(done) {
     const params = {
       id: attributes.id
-		};
+    };
     app.XService$
       .act("x_user:find_by_id", { params })
       .then(({ errorCode$ = "ERROR_NONE", data$, errors$ }) => {
@@ -121,6 +121,33 @@ describe("XUser - Basic", function() {
 
         // Password must not return
         expect(data$.password).to.be.not.exist;
+
+        // Test is successful
+        done();
+      })
+      .catch(done);
+  });
+
+  it("Read many record", function(done) {
+    app.XService$
+      .act("x_user:find_all", {})
+      .then(({ errorCode$ = "ERROR_NONE", data$, errors$ }) => {
+        // If errorCode$ is not equal to ERROR_NONE, that mean we an error :) easy
+        expect(errorCode$).to.be.equal("ERROR_NONE");
+
+        // If action has been successful, data$ must be an object
+				expect(data$).to.be.an("array");
+
+        // And our data must be exist
+        expect(data$[0].username).to.be.exist;
+        expect(data$[0].email).to.be.exist;
+        expect(data$[0].firstName).to.be.exist;
+        expect(data$[0].lastName).to.be.exist;
+        expect(data$[0].status).to.be.exist;
+        expect(data$[0].id).to.be.exist;
+
+        // Password must not return
+        expect(data$[0].password).to.be.not.exist;
 
         // Test is successful
         done();

@@ -77,6 +77,15 @@ export default function XUser(options) {
       .catch(done);
   });
 
+  this.add("x_user:find_all", function(args, done) {
+    const { query } = args;
+    const entity = this.make$.apply(null, options.entity);
+    entity
+      .asyncList$(_.assign({}, query, { fields$: PUBLIC_FIELDS }))
+      .then(entities => done(null, { data$: entities }))
+      .catch(done);
+  });
+
   // You must return service name, it must is the name you registered on init function
   return { name: "XUser" };
 }

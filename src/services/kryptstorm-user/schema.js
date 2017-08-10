@@ -42,6 +42,23 @@ const onFindById = {
   }
 };
 
+const onFindAll = {
+  $id: "XUser.OnFindAll",
+  properties: {
+    id: { type: "string", pattern: "^[a-fA-F0-9]{24}$" },
+    username: { type: "string", minLength: 3, maxLength: 255 },
+    email: { format: "email" },
+    password: { type: "string", minLength: 3, maxLength: 255 },
+    status: {
+      type: "number",
+      enum: [STATUS_NEW, STATUS_ACTIVE]
+    },
+    firstName: { type: "string", maxLength: 255 },
+    lastName: { type: "string", maxLength: 255 },
+    createdAt: { format: "date-time" }
+  }
+};
+
 // Schema on update user
 const onUpdate = {
   $id: "XUser.OnUpdate",
@@ -70,5 +87,5 @@ const onDetele = {
 // Export validator
 export default new Ajv({
   removeAdditional: "all",
-  schemas: [onCreate, onFindById, onUpdate, onDetele]
+  schemas: [onCreate, onFindById, onFindAll, onUpdate, onDetele]
 });

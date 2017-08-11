@@ -74,7 +74,7 @@ const onUpdate = {
 
 // Schema on delete user
 const onDetele = {
-  $id: "XUser.OnDelete",
+  $id: "XUser.OnDetele",
   required: ["id"],
   properties: {
     id: { type: "string", pattern: "^[a-fA-F0-9]{24}$" }

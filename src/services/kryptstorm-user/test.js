@@ -191,6 +191,40 @@ describe("XUser - Basic", function() {
         // Password must not return
         expect(data$.password).to.be.not.exist;
 
+        // Assing our result for next test case
+        _.assign(attributes, data$);
+
+        // Test is successful
+        done();
+      })
+      .catch(done);
+  });
+
+  it("Delete one record by id", function(done) {
+    const params = {
+      id: attributes.id
+    };
+
+    app.XService$
+      .act("x_user:delete_by_id", { params })
+      .then(({ errorCode$ = "ERROR_NONE", data$ }) => {
+        // If errorCode$ is not equal to ERROR_NONE, that mean we an error :) easy
+        expect(errorCode$).to.be.equal("ERROR_NONE");
+
+        // If action has been successful, data$ must be an object
+        expect(data$).to.be.an("object");
+
+        // Return deleted record attributes
+        expect(data$.username).to.be.equal(attributes.username);
+        expect(data$.email).to.be.equal(attributes.email);
+        expect(data$.firstName).to.be.equal(attributes.firstName);
+        expect(data$.lastName).to.be.equal(attributes.lastName);
+        expect(data$.status).to.be.equal(attributes.status);
+        expect(data$.id).to.be.equal(attributes.id);
+
+        // Password must not return
+        expect(data$.password).to.be.not.exist;
+
         // Test is successful
         done();
       })

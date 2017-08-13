@@ -45,15 +45,7 @@ export default function Https(options) {
           this.XService$
             .act(pattern, _preparePayload(req, res))
             .then(
-              ({
-                errorCode$ = "ERROR_NONE",
-                message$ = "",
-                data$ = {},
-                errors$
-              }) => {
-                /** Server encountered an error while trying to handle request */
-                if (!_.isUndefined(errors$)) return next(errors$);
-
+              ({ errorCode$ = "ERROR_NONE", message$ = "", data$ = {} }) => {
                 /** If errorCode$ is not equal to ERROR_NONE, response error code and error message */
                 if (errorCode$ !== "ERROR_NONE") {
                   return res.json({ errorCode: errorCode$, message: message$ });

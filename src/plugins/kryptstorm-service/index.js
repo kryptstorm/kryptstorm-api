@@ -12,10 +12,12 @@ const defaultOptions = {
 };
 
 // Seneca plugin
-export default function XService(options) {
-  // Extend user options with default options
-  options = _.merge(defaultOptions, options);
-
+export default function XService({
+  maps = {},
+  beforeHooks = {},
+  afterHooks = {},
+  allowMethods = ["POST", "GET", "PUT", "DELETE"]
+}) {
   //
   // Proccess external services
   //
@@ -24,7 +26,7 @@ export default function XService(options) {
   // Check a pattern is external (does npt register on this instance)
   const _isExternalPattern = pattern =>
     _.isString(pattern) &&
-    (_.isObject(options.maps[pattern]) || _.isString(options.maps[pattern]));
+    (_.isObject(maps[pattern]) || _.isString(maps[pattern]));
   // Register act, this function will help user run external services
   const _act = (pattern, patternParams) => {
     // Make seneca.act return a promise
@@ -38,7 +40,7 @@ export default function XService(options) {
     }
 
     // We need to call an external service
-    const _externalPattern = options.maps[pattern];
+    const _externalPattern = maps[pattern];
     const {
       method = "GET",
       url,
@@ -48,11 +50,11 @@ export default function XService(options) {
       body
     } = _externalPattern;
     // Only handle allow method
-    if (!_.includes(options.allowMethods, method)) {
+    if (!_.includes(allowMethods, method)) {
       return Bluebird.reject(
         new Error(
           `The method ${method} is not allow. Only accept: ` +
-            options.allowMethods.join(",")
+            allowMethods.join(",")
         )
       );
     }
@@ -78,8 +80,8 @@ export default function XService(options) {
   // hook will return an exception an don't execute anything
 
   // Register global hook
-  let _beforeHooks = _resolvePattern(options.beforeHooks.global),
-    _afterHooks = _resolvePattern(options.afterHooks.global);
+  let _beforeHooks = _resolvePattern(beforeHooks.global),
+    _afterHooks = _resolvePattern(afterHooks.global);
 
   // Check all pattern has been exist
   const _verifyPatterns = patterns => {
@@ -100,9 +102,9 @@ export default function XService(options) {
     act: (pattern, patternParams) => {
       return _verifyPatterns([
         ..._beforeHooks,
-        ..._resolvePattern(options.beforeHooks[pattern]),
+        ..._resolvePattern(beforeHooks[pattern]),
         pattern,
-        ..._resolvePattern(options.afterHooks[pattern]),
+        ..._resolvePattern(afterHooks[pattern]),
         ..._afterHooks
       ]).then(patterns =>
         _.reduce(

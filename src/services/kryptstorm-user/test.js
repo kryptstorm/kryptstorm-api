@@ -13,12 +13,12 @@ import XService from "../../plugins/kryptstorm-service";
 import XEntity from "../../plugins/kryptstorm-entity";
 
 // Defined function - what will return test app instance
-const App = fn =>
+const App = () =>
   Seneca({
     timeout: 10000,
     log: "test",
     debug: { undead: true }
-  }).test(fn);
+  });
 
 // Defined basic test
 describe("XUser - Basic", function() {

@@ -76,6 +76,11 @@ export default function Https(options) {
       let httpCode = 500,
         errorResponse = { errorCode: "ERROR_SYSTEM", message: _errorMessage };
 
+      if (isDebug) {
+        (errorResponse.message = err.message), (errorResponse.errors =
+          err.stack);
+      }
+
       return res.status(httpCode).json(errorResponse);
     });
 

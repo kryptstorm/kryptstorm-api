@@ -11,12 +11,12 @@ import { expect } from "chai";
 import XService from ".";
 
 // Defined function - what will return test app instance
-const App = fn =>
+const App = () =>
   Seneca({
     timeout: 10000,
     log: "test",
     debug: { undead: true }
-  }).test(fn);
+  });
 
 // Defined basic test
 describe("XService - Call external API - what is not belong to Kryptstorm", function() {
@@ -124,22 +124,22 @@ describe("XService - Hooks", function() {
     // Register XService
     app.use(XService, {
       beforeHooks: {
-        "x_service:test": ["x_service:hook, before:global"]
+        "x_service:test": ["x_service:hook, before:service"]
       },
       afterHooks: {
-        "x_service:test": ["x_service:hook, after:global"]
+        "x_service:test": ["x_service:hook, after:service"]
       }
     });
 
     // Before hook for test, all thing you need will be prepare at there
     before(done => {
-      app.add("x_service:hook, before:global", function(args, done) {
+      app.add("x_service:hook, before:service", function(args, done) {
         return done(null, { data$: { before: "hook" } });
       });
       app.add("x_service:test", function(args, done) {
         return done(null, { data$: { main: "handler" } });
       });
-      app.add("x_service:hook, after:global", function(args, done) {
+      app.add("x_service:hook, after:service", function(args, done) {
         return done(null, { data$: { after: "hook" } });
       });
       // App is ready to test

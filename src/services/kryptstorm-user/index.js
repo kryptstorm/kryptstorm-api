@@ -132,8 +132,8 @@ export default function XUser(options) {
       })
       .then(attributes => done(null, { data$: attributes }))
       .catch(done);
-	});
-		
+  });
+
   this.add("x_user:delete_by_id", function(args, done) {
     const { params } = args;
     const entity = this.make$.apply(null, options.entity);
@@ -150,7 +150,7 @@ export default function XUser(options) {
       .asyncRemove$(_.assign({}, params, { fields$: PUBLIC_FIELDS }), true)
       .then(attributes => done(null, { data$: attributes }))
       .catch(done);
-	});
+  });
 
   // You must return service name, it must is the name you registered on init function
   return { name: "XUser" };

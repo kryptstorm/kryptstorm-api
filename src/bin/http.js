@@ -1,6 +1,8 @@
+// External modules
+import XHttp from "kryptstorm-http";
+
 // Internal modules
 import app from "..";
-import XHttp from "../plugins/kryptstorm-http";
 import routes from "./routes";
 
 // Register XHttp

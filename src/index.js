@@ -1,11 +1,10 @@
 // External modules
 import Seneca from "seneca";
 import Bluebird from "bluebird";
+import XService from "kryptstorm-service";
+import XEntity from "kryptstorm-entity";
 
 // Internal modules
-import XService from "./plugins/kryptstorm-service";
-import XEntity from "./plugins/kryptstorm-entity";
-
 import XUser from "./services/kryptstorm-user";
 
 // Create app instance
@@ -27,10 +26,8 @@ app.use("mongo-store", {
 });
 app.use("entity");
 
-// Kryptstorm plugins
 app.use(XService);
 app.use(XEntity);
-
 app.use(XUser);
 
 // Export app

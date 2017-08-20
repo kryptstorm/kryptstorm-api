@@ -7,7 +7,7 @@ import Validator, { PUBLIC_FIELDS } from "./schema";
 
 // Default options of this plugin
 const defaultOptions = {
-  entity: ["mongo", "kryptstorm", "user"]
+  entity: ["mongo", "kryptstorm", "users"]
 };
 
 // Seneca plugin

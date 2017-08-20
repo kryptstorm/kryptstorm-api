@@ -51,7 +51,7 @@ const onFindAll = {
     email: { format: "email" },
     status: {
       type: "number",
-      enum: [STATUS_NEW, STATUS_ACTIVE]
+      enum: [STATUS_NEW, STATUS_ACTIVE, STATUS_LOCKED]
     },
     firstName: { type: "string", maxLength: 255 },
     lastName: { type: "string", maxLength: 255 }

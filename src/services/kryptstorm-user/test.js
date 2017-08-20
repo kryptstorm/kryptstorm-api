@@ -5,12 +5,12 @@ import Bcrypt from "bcrypt";
 import Bluebird from "bluebird";
 import { expect } from "chai";
 import Faker from "faker";
+import XService from "kryptstorm-service";
+import XEntity from "kryptstorm-entity";
 
 // Internal modules
 import XUser from ".";
 import { STATUS_ACTIVE, STATUS_LOCKED } from "./schema";
-import XService from "../../plugins/kryptstorm-service";
-import XEntity from "../../plugins/kryptstorm-entity";
 
 // Defined function - what will return test app instance
 const App = () =>
@@ -130,7 +130,7 @@ describe("XUser - Basic", function() {
 
   it("Read many record", function(done) {
     app.XService$
-      .act("x_user:find_all", {})
+      .act("x_user:find_all", { query: {} })
       .then(({ errorCode$ = "ERROR_NONE", data$, errors$ }) => {
         // If errorCode$ is not equal to ERROR_NONE, that mean we an error :) easy
         expect(errorCode$).to.be.equal("ERROR_NONE");

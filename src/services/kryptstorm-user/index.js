@@ -81,6 +81,11 @@ export default function XUser(options) {
     const { query } = args;
     const entity = this.make$.apply(null, options.entity);
 
+    // Convert some fields to right data type
+    if (!_.isUndefined(query.status)) {
+      query.status = Number(query.status);
+    }
+
     // Validation has been failed
     if (!Validator.validate("XUser.OnFindAll", query)) {
       return done(null, {

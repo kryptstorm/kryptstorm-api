@@ -12,7 +12,7 @@ const app = Seneca({
   debug: { undead: process.env.NODE_ENV !== "production" }
 });
 
-// @see http://senecajs.org/docs/tutorials/how-to-write-a-plugin.html
+// Short syntax to install seneca plugin
 app.use("mongo-store", {
   name: process.env.MONGO_DATABASE,
   host: process.env.MONGO_HOST,

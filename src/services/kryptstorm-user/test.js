@@ -22,7 +22,7 @@ const App = () =>
 
 // Defined basic test
 describe("XUser - Basic", function() {
-  let attributes;
+  let userAttributes;
   // Init test app
   const app = App();
 
@@ -56,7 +56,7 @@ describe("XUser - Basic", function() {
   });
 
   it("Create", function(done) {
-    const body = {
+    const attributes = {
       username: Faker.internet.userName(),
       email: Faker.internet.email(),
       password: Faker.internet.password(),
@@ -65,7 +65,7 @@ describe("XUser - Basic", function() {
       status: STATUS_ACTIVE
     };
     app.XService$
-      .act("x_user:create", { body })
+      .act("x_user:create", { attributes })
       .then(({ errorCode$ = "ERROR_NONE", data$ }) => {
         // If errorCode$ is not equal to ERROR_NONE, that mean we an error :) easy
         expect(errorCode$).to.be.equal("ERROR_NONE");
@@ -74,15 +74,15 @@ describe("XUser - Basic", function() {
         expect(data$).to.be.an("object");
 
         // And our data must be exist
-        expect(data$.username).to.be.equal(_.toLower(body.username));
-        expect(data$.email).to.be.equal(_.toLower(body.email));
+        expect(data$.username).to.be.equal(_.toLower(attributes.username));
+        expect(data$.email).to.be.equal(_.toLower(attributes.email));
         expect(data$.firstName).to.be.equal(
-          _.upperFirst(_.toLower(body.firstName))
+          _.upperFirst(_.toLower(attributes.firstName))
         );
         expect(data$.lastName).to.be.equal(
-          _.upperFirst(_.toLower(body.lastName))
+          _.upperFirst(_.toLower(attributes.lastName))
         );
-        expect(data$.status).to.be.equal(body.status);
+        expect(data$.status).to.be.equal(attributes.status);
         expect(data$.createdAt).to.be.exist;
         expect(data$.id).to.be.exist;
 
@@ -90,7 +90,7 @@ describe("XUser - Basic", function() {
         expect(data$.password).to.be.not.exist;
 
         // Store user attributes
-        attributes = _.assign({}, data$);
+        userAttributes = _.assign({}, data$);
 
         // Test is successful
         done();
@@ -100,7 +100,7 @@ describe("XUser - Basic", function() {
 
   it("Read one record by id", function(done) {
     const params = {
-      id: attributes.id
+      id: userAttributes.id
     };
     app.XService$
       .act("x_user:find_by_id", { params })
@@ -112,12 +112,12 @@ describe("XUser - Basic", function() {
         expect(data$).to.be.an("object");
 
         // And our data must be exist
-        expect(data$.username).to.be.equal(attributes.username);
-        expect(data$.email).to.be.equal(attributes.email);
-        expect(data$.firstName).to.be.equal(attributes.firstName);
-        expect(data$.lastName).to.be.equal(attributes.lastName);
-        expect(data$.status).to.be.equal(attributes.status);
-        expect(data$.id).to.be.equal(attributes.id);
+        expect(data$.username).to.be.equal(userAttributes.username);
+        expect(data$.email).to.be.equal(userAttributes.email);
+        expect(data$.firstName).to.be.equal(userAttributes.firstName);
+        expect(data$.lastName).to.be.equal(userAttributes.lastName);
+        expect(data$.status).to.be.equal(userAttributes.status);
+        expect(data$.id).to.be.equal(userAttributes.id);
 
         // Password must not return
         expect(data$.password).to.be.not.exist;
@@ -136,18 +136,20 @@ describe("XUser - Basic", function() {
         expect(errorCode$).to.be.equal("ERROR_NONE");
 
         // If action has been successful, data$ must be an object
-        expect(data$).to.be.an("array");
+        expect(data$).to.be.an("object");
+        expect(data$.rows).to.be.an("array");
+        expect(data$.pages).to.be.an("number");
 
         // And our data must be exist
-        expect(data$[0].username).to.be.exist;
-        expect(data$[0].email).to.be.exist;
-        expect(data$[0].firstName).to.be.exist;
-        expect(data$[0].lastName).to.be.exist;
-        expect(data$[0].status).to.be.exist;
-        expect(data$[0].id).to.be.exist;
+        expect(data$.rows[0].username).to.be.exist;
+        expect(data$.rows[0].email).to.be.exist;
+        expect(data$.rows[0].firstName).to.be.exist;
+        expect(data$.rows[0].lastName).to.be.exist;
+        expect(data$.rows[0].status).to.be.exist;
+        expect(data$.rows[0].id).to.be.exist;
 
         // Password must not return
-        expect(data$[0].password).to.be.not.exist;
+        expect(data$.rows[0].password).to.be.not.exist;
 
         // Test is successful
         done();
@@ -157,16 +159,16 @@ describe("XUser - Basic", function() {
 
   it("Update one record by id", function(done) {
     const params = {
-      id: attributes.id
+      id: userAttributes.id
     };
-    const body = {
+    const attributes = {
       firstName: Faker.name.firstName(),
       lastName: Faker.name.lastName(),
       status: STATUS_LOCKED
     };
 
     app.XService$
-      .act("x_user:update_by_id", { params, body })
+      .act("x_user:update_by_id", { params, attributes })
       .then(({ errorCode$ = "ERROR_NONE", data$ }) => {
         // If errorCode$ is not equal to ERROR_NONE, that mean we an error :) easy
         expect(errorCode$).to.be.equal("ERROR_NONE");
@@ -178,12 +180,12 @@ describe("XUser - Basic", function() {
         expect(data$.username).to.be.exist;
         expect(data$.email).to.be.exist;
         expect(data$.firstName).to.be.equal(
-          _.upperFirst(_.toLower(body.firstName))
+          _.upperFirst(_.toLower(attributes.firstName))
         );
         expect(data$.lastName).to.be.equal(
-          _.upperFirst(_.toLower(body.lastName))
+          _.upperFirst(_.toLower(attributes.lastName))
         );
-        expect(data$.status).to.be.equal(body.status);
+        expect(data$.status).to.be.equal(attributes.status);
         expect(data$.createdAt).to.be.exist;
         expect(data$.updatedAt).to.be.exist;
         expect(data$.id).to.be.exist;
@@ -192,7 +194,7 @@ describe("XUser - Basic", function() {
         expect(data$.password).to.be.not.exist;
 
         // Assing our result for next test case
-        _.assign(attributes, data$);
+        _.assign(userAttributes, data$);
 
         // Test is successful
         done();
@@ -202,7 +204,7 @@ describe("XUser - Basic", function() {
 
   it("Delete one record by id", function(done) {
     const params = {
-      id: attributes.id
+      id: userAttributes.id
     };
 
     app.XService$
@@ -215,12 +217,12 @@ describe("XUser - Basic", function() {
         expect(data$).to.be.an("object");
 
         // Return deleted record attributes
-        expect(data$.username).to.be.equal(attributes.username);
-        expect(data$.email).to.be.equal(attributes.email);
-        expect(data$.firstName).to.be.equal(attributes.firstName);
-        expect(data$.lastName).to.be.equal(attributes.lastName);
-        expect(data$.status).to.be.equal(attributes.status);
-        expect(data$.id).to.be.equal(attributes.id);
+        expect(data$.username).to.be.equal(userAttributes.username);
+        expect(data$.email).to.be.equal(userAttributes.email);
+        expect(data$.firstName).to.be.equal(userAttributes.firstName);
+        expect(data$.lastName).to.be.equal(userAttributes.lastName);
+        expect(data$.status).to.be.equal(userAttributes.status);
+        expect(data$.id).to.be.equal(userAttributes.id);
 
         // Password must not return
         expect(data$.password).to.be.not.exist;

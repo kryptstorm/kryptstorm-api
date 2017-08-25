@@ -54,7 +54,11 @@ const onFindAll = {
       enum: [STATUS_NEW, STATUS_ACTIVE, STATUS_LOCKED]
     },
     firstName: { type: "string", maxLength: 255 },
-    lastName: { type: "string", maxLength: 255 }
+    lastName: { type: "string", maxLength: 255 },
+
+    skip$: { type: "number" },
+    limit$: { type: "number" },
+    sort$: { type: "object" }
   }
 };
 

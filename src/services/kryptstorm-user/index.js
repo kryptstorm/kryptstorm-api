@@ -22,23 +22,24 @@ export default function XUser(options) {
 
   // Create new user
   this.add("x_user:create", function(args, done) {
-    const { body } = args;
+    const { attributes } = args;
     const entity = this.make$.apply(null, options.entity);
 
     // Add creattion datetime
-    body.createdAt = new Date();
+    attributes.createdAt = new Date();
 
     // Validation has been failed
-    if (!Validator.validate("XUser.OnCreate", body)) {
+    if (!Validator.validate("XUser.OnCreate", attributes)) {
       return done(null, {
         errorCode$: "VALIDATION_FAILED",
-        errors$: Validator.errors
+        errors$: Validator.errors,
+        message$: Validator.errorsText()
       });
     }
 
     // Set attributes
-    // After validation, body is clean because of options "removeAdditional"
-    _.assign(entity, body);
+    // After validation, attributes is clean because of options "removeAdditional"
+    _.assign(entity, attributes);
 
     // Format some fields
     entity.username = _.toLower(entity.username);
@@ -67,7 +68,8 @@ export default function XUser(options) {
     if (!Validator.validate("XUser.OnFindById", params)) {
       return done(null, {
         errorCode$: "VALIDATION_FAILED",
-        errors$: Validator.errors
+        errors$: Validator.errors,
+        message$: Validator.errorsText()
       });
     }
 
@@ -90,7 +92,8 @@ export default function XUser(options) {
     if (!Validator.validate("XUser.OnFindAll", query)) {
       return done(null, {
         errorCode$: "VALIDATION_FAILED",
-        errors$: Validator.errors
+        errors$: Validator.errors,
+        message$: Validator.errorsText()
       });
     }
 
@@ -101,23 +104,25 @@ export default function XUser(options) {
   });
 
   this.add("x_user:update_by_id", function(args, done) {
-    const { params, body } = args;
+    const { params, attributes } = args;
     const entity = this.make$.apply(null, options.entity);
 
     // Add creattion datetime
-    body.updatedAt = new Date();
+    attributes.updatedAt = new Date();
 
     // Validation has been failed
     if (!Validator.validate("XUser.OnFindById", params)) {
       return done(null, {
         errorCode$: "VALIDATION_FAILED",
-        errors$: Validator.errors
+        errors$: Validator.errors,
+        message$: Validator.errorsText()
       });
     }
-    if (!Validator.validate("XUser.OnUpdate", body)) {
+    if (!Validator.validate("XUser.OnUpdate", attributes)) {
       return done(null, {
         errorCode$: "VALIDATION_FAILED",
-        errors$: Validator.errors
+        errors$: Validator.errors,
+        message$: Validator.errorsText()
       });
     }
 
@@ -125,8 +130,8 @@ export default function XUser(options) {
       .asyncLoad$(_.assign({}, params, { fields$: PUBLIC_FIELDS }), true)
       .then(entity => {
         // Set attributes
-        // After validation, body is clean because of options "removeAdditional"
-        _.assign(entity, body);
+        // After validation, attributes is clean because of options "removeAdditional"
+        _.assign(entity, attributes);
 
         // Format some fields
         entity.firstName = _.upperFirst(_.toLower(entity.firstName));
@@ -147,7 +152,8 @@ export default function XUser(options) {
     if (!Validator.validate("XUser.OnDetele", params)) {
       return done(null, {
         errorCode$: "VALIDATION_FAILED",
-        errors$: Validator.errors
+        errors$: Validator.errors,
+        message$: Validator.errorsText()
       });
     }
 
